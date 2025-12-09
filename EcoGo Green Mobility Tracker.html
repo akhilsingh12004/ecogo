@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4CAF50">
+    <title>EcoGo - Green Mobility Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #45a049;
+            --secondary: #667eea;
+            --accent: #764ba2;
+            --white: #ffffff;
+            --light: #f8f9fa;
+            --gray: #e0e0e0;
+            --text: #333333;
+            --text-light: #666666;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container { 
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: var(--white); 
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+        }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); 
+            color: var(--white); 
+            padding: 30px 20px; 
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .header h1 { 
+            font-size: 28px; 
+            margin-bottom: 10px; 
+            font-weight: 700; 
+        }
+        
+        .points { 
+            font-size: 42px; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            animation: slideIn 0.5s ease; 
+        }
+        
+        .header-subtitle { font-size: 14px; opacity: 0.9; }
+        
+        .content { 
+            padding: 30px 20px; 
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        @media (min-width: 768px) {
+            .header {
+                padding: 40px 30px;
+            }
+            .header h1 {
+                font-size: 36px;
+            }
+            .points {
+                font-size: 56px;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .header h1 {
+                font-size: 42px;
+            }
+            .points {
+                font-size: 64px;
+            }
+        }
+        
+        .card { 
+            background: var(--light); 
+            border-radius: 15px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12); 
+        }
+        
+        .card h3 { 
+            color: var(--primary); 
+            margin-bottom: 15px; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
+        
+        .trip-input { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+            flex-wrap: wrap;
+        }
+        
+        input, select, button { 
+            padding: 12px; 
+            border: 2px solid var(--gray); 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-family: inherit;
+        }
+        
+        input, select { 
+            flex: 1; 
+            min-width: 120px;
+            background: var(--white);
+            color: var(--text);
+        }
+        
+        @media (min-width: 768px) {
+            input, select, button {
+                padding: 14px;
+                font-size: 16px;
+            }
+        }
+        
+        input::placeholder { color: var(--text-light); }
+        
+        button { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: var(--white); 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s; 
+        }
+        
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(76,175,80,0.4); 
+        }
+        
+        button:active { transform: translateY(0); }
+        
+        .results { 
+            background: var(--white); 
+            border-radius: 10px; 
+            padding: 15px; 
+            margin-top: 15px; 
+            display: none; 
+            border: 2px solid var(--primary);
+        }
+        
+        .status-text {
+            margin: 8px 0;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .co2-saved { 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: var(--primary); 
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .route-header { 
+            font-weight: 600; 
+            color: var(--text); 
+            margin-bottom: 10px; 
+            font-size: 14px;
+        }
+        
+        .mode-btn { 
+            padding: 12px; 
+            text-align: center; 
+            border: 2px solid var(--gray); 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            background: var(--white); 
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        
+        .mode-btn:hover { 
+            border-color: var(--primary); 
+            background: #e8f5e8; 
+            transform: translateY(-2px); 
+        }
+        
+        .mode-btn.selected { 
+            border-color: var(--primary); 
+            background: #c8e6c9; 
+            font-weight: 600;
+        }
+        
+        .mode-btn small { 
+            display: block; 
+            color: var(--text-light); 
+            margin-top: 5px;
+        }
+        
+        .booking-options {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--gray);
+            display: none;
+        }
+        
+        .booking-options.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .booking-btn {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 14px;
+            font-size: 15px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .booking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .booking-section {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .booking-section.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .booking-info {
+            background: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .booking-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .booking-info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .booking-info-label {
+            color: var(--text-light);
+        }
+        
+        .booking-info-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .confirm-booking-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .confirm-booking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .close-booking-btn {
+            background: var(--gray);
+            color: var(--text);
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .close-booking-btn:hover {
+            background: #d0d0d0;
+        }
+        
+        .impact-stats { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            margin-top: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .impact-stats {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        .stat { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: var(--white); 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat:hover { transform: scale(1.05); }
+        
+        .stat-number { 
+            font-size: 20px; 
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label { 
+            font-size: 12px; 
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .leaderboard { margin-top: 15px; }
+        
+        .leader-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 10px 0; 
+            border-bottom: 1px solid var(--gray); 
+            font-size: 14px;
+        }
+        
+        @media (min-width: 768px) {
+            .leader-item {
+                padding: 15px 0;
+                font-size: 16px;
+            }
+        }
+        
+        .leader-item:last-child { border-bottom: none; }
+        
+        .leader-rank { 
+            font-weight: 600; 
+            min-width: 30px; 
+            color: var(--primary);
+        }
+        
+        .detection-box { 
+            background: var(--white); 
+            padding: 12px; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .detection-mode { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--primary);
+        }
+        
+        .detection-info { 
+            font-size: 12px; 
+            color: var(--text-light); 
+            margin-top: 5px;
+        }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.4);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content { 
+            background-color: var(--white); 
+            margin: auto;
+            padding: 30px; 
+            border-radius: 20px; 
+            width: 80%; 
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: slideUp 0.3s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @media (min-width: 768px) {
+            .modal-content {
+                width: 90%;
+                max-width: 500px;
+                padding: 40px;
+            }
+        }
+        
+        .modal-content h2 { color: var(--primary); margin-bottom: 15px; }
+        
+        .modal-content p { color: var(--text-light); margin-bottom: 20px; }
+        
+        .close-modal { 
+            background: var(--primary); 
+            color: var(--white); 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+        }
+        
+        .rewards-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 10px; 
+            margin-top: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .rewards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .rewards-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .reward-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--gray);
+            transition: all 0.3s;
+        }
+        
+        .reward-item:hover { 
+            border-color: var(--primary); 
+            box-shadow: 0 3px 10px rgba(76,175,80,0.2);
+        }
+        
+        .reward-name { font-weight: 600; color: var(--text); }
+        
+        .reward-pts { 
+            font-weight: 700; 
+            color: var(--primary); 
+            font-size: 14px;
+        }
+        
+        .redeem-btn { 
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .redeem-btn:hover { background: var(--primary-dark); }
+        
+        .redeem-btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        
+        .export-section { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 15px;
+        }
+        
+        .export-btn { 
+            flex: 1; 
+            background: var(--secondary); 
+            font-size: 13px;
+        }
+        
+        .stats-chart { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: var(--white);
+            border-radius: 8px;
+        }
+        
+        .chart-bar { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 10px;
+        }
+        
+        .chart-label { 
+            width: 60px; 
+            font-size: 12px; 
+            font-weight: 600;
+        }
+        
+        .chart-fill { 
+            flex: 1; 
+            height: 20px; 
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark)); 
+            border-radius: 4px; 
+            margin: 0 10px;
+        }
+        
+        .chart-value { 
+            width: 40px; 
+            text-align: right; 
+            font-size: 12px; 
+            font-weight: 600;
+        }
+        
+        .confetti { 
+            position: fixed; 
+            width: 10px; 
+            height: 10px; 
+            background: var(--primary); 
+            pointer-events: none; 
+            animation: fall 3s ease-in forwards;
+        }
+        
+        @keyframes slideIn { 
+            from { transform: translateY(-20px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+        
+        @keyframes slideUp { 
+            from { transform: translateY(100px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+        
+        @keyframes fall { 
+            to { 
+                transform: translateY(100vh) rotateZ(360deg); 
+                opacity: 0; 
+            } 
+        }
+        
+        .tab-buttons { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+            border-bottom: 2px solid var(--gray);
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn { 
+            padding: 10px 15px; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-size: 14px;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        @media (min-width: 768px) {
+            .tab-btn {
+                flex: 0;
+                min-width: auto;
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+        }
+        
+        .tab-btn.active { 
+            color: var(--primary); 
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content { display: none; }
+        
+        .tab-content.active { display: block; }
+        
+        @media (max-width: 480px) { 
+            .trip-input { 
+                flex-direction: column; 
+            }
+            .header h1 { font-size: 24px; }
+            .points { font-size: 36px; }
+            .content {
+                padding: 20px 15px;
+            }
+            .card {
+                padding: 15px;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 767px) {
+            .trip-input {
+                flex-wrap: wrap;
+            }
+            .trip-input input {
+                flex: 1 1 calc(50% - 5px);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .trip-input {
+                flex-wrap: nowrap;
+            }
+            .card {
+                padding: 25px;
+            }
+            .card h3 {
+                font-size: 20px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .card {
+                padding: 30px;
+            }
+            .stats-chart {
+                padding: 20px;
+            }
+        }
+        
+        @media (orientation: landscape) and (max-height: 600px) {
+            .header {
+                padding: 20px;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 EcoGo</h1>
+            <div class="points" id="greenPoints">1,250</div>
+            <div class="header-subtitle">Green Points Earned</div>
+        </div>
+        
+        <div class="content">
+            <!-- Tab Navigation -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('trip')">🧭 Plan Trip</button>
+                <button class="tab-btn" onclick="switchTab('rewards')">🏆 Rewards</button>
+                <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+            </div>
+
+            <!-- Trip Planner Tab -->
+            <div class="tab-content active" id="trip">
+                <div class="card">
+                    <h3>🧭 Plan Your Trip</h3>
+                    <div class="trip-input">
+                        <input type="text" id="start" placeholder="From" value="Home" list="locations">
+                        <input type="text" id="end" placeholder="To" value="College" list="locations">
+                        <button onclick="calculateTrip()">Find Routes</button>
+                    </div>
+                    <datalist id="locations">
+                        <option value="Home">
+                        <option value="College">
+                        <option value="Office">
+                        <option value="Metro Station">
+                        <option value="Shopping Mall">
+                    </datalist>
+                    <div class="results" id="tripResults">
+                        <div class="co2-saved" id="co2Saved">0 kg CO₂ saved</div>
+                        <div class="route-header">Smart Route Options:</div>
+                        <div id="routeOptions"></div>
+                        <div class="booking-options" id="bookingOptions">
+                            <button class="booking-btn" onclick="showBusBooking()">
+                                🚌 Book Bus Ticket
+                            </button>
+                            <button class="booking-btn" onclick="showCarpoolBooking()">
+                                🚗 Find Carpool Ride
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Bus Booking Section -->
+                    <div class="booking-section" id="busBooking">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">🚌 Bus Booking</h3>
+                        <div class="booking-info" id="busInfo"></div>
+                        <div class="booking-form">
+                            <div class="form-group">
+                                <label>Select Date</label>
+                                <input type="date" id="busDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Time</label>
+                                <select id="busTime" required>
+                                    <option value="">Choose time</option>
+                                    <option value="08:00">08:00 AM</option>
+                                    <option value="09:00">09:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="14:00">02:00 PM</option>
+                                    <option value="15:00">03:00 PM</option>
+                                    <option value="16:00">04:00 PM</option>
+                                    <option value="17:00">05:00 PM</option>
+                                    <option value="18:00">06:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Passengers</label>
+                                <select id="busPassengers" required>
+                                    <option value="1">1 Passenger</option>
+                                    <option value="2">2 Passengers</option>
+                                    <option value="3">3 Passengers</option>
+                                    <option value="4">4 Passengers</option>
+                                </select>
+                            </div>
+                            <button class="confirm-booking-btn" onclick="confirmBusBooking()">Confirm Bus Booking</button>
+                            <button class="close-booking-btn" onclick="closeBooking('busBooking')">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Carpool Booking Section -->
+                    <div class="booking-section" id="carpoolBooking">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">🚗 Carpool Booking</h3>
+                        <div class="booking-info" id="carpoolInfo"></div>
+                        <div class="booking-form">
+                            <div class="form-group">
+                                <label>Select Date</label>
+                                <input type="date" id="carpoolDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Time</label>
+                                <select id="carpoolTime" required>
+                                    <option value="">Choose time</option>
+                                    <option value="08:00">08:00 AM</option>
+                                    <option value="09:00">09:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="14:00">02:00 PM</option>
+                                    <option value="15:00">03:00 PM</option>
+                                    <option value="16:00">04:00 PM</option>
+                                    <option value="17:00">05:00 PM</option>
+                                    <option value="18:00">06:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Seats Needed</label>
+                                <select id="carpoolSeats" required>
+                                    <option value="1">1 Seat</option>
+                                    <option value="2">2 Seats</option>
+                                    <option value="3">3 Seats</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Preferred Vehicle Type</label>
+                                <select id="carpoolVehicle">
+                                    <option value="any">Any</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="suv">SUV</option>
+                                    <option value="hatchback">Hatchback</option>
+                                </select>
+                            </div>
+                            <button class="confirm-booking-btn" onclick="confirmCarpoolBooking()">Find Carpool Match</button>
+                            <button class="close-booking-btn" onclick="closeBooking('carpoolBooking')">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Journey Tracker -->
+                <div class="card">
+                    <h3>🚦 Manual Journey Tracker</h3>
+                    <div class="trip-input">
+                        <input type="number" id="manualDistance" placeholder="Distance (km)" min="0" step="0.1">
+                        <select id="manualMode">
+                            <option value="walk">🚶 Walk</option>
+                            <option value="cycle">🚲 Cycle</option>
+                            <option value="bus">🚌 Bus</option>
+                            <option value="train">🚆 Metro/Train</option>
+                            <option value="carpool">🤝 Carpool</option>
+                            <option value="car">🚗 Solo Car</option>
+                        </select>
+                        <button id="startJourneyBtn" onclick="startManualJourney()">Start Journey</button>
+                        <button id="completeJourneyBtn" onclick="completeManualJourney()" disabled>Complete</button>
+                    </div>
+                    <div class="status-text" id="manualStatus">Enter a distance and select a mode to begin tracking.</div>
+                    <div class="results" id="manualResults">
+                        <div class="co2-saved" id="manualCo2Summary">0 kg CO₂ impact</div>
+                        <div id="manualSummary"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📱 Auto Mode Detection</h3>
+                    <div class="detection-box">
+                        <div class="detection-mode" id="detectedMode">Walking (85% confidence)</div>
+                        <div class="detection-info">🛰️ GPS | 📊 Accelerometer | 🔄 Gyroscope</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Community Impact</h3>
+                    <div class="impact-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="totalCo2">12,847</span>
+                            <span class="stat-label">kg CO₂ Saved</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="activeUsers">642</span>
+                            <span class="stat-label">Active Users</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="trees">51</span>
+                            <span class="stat-label">Trees Planted</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="carsOffRoad">51</span>
+                            <span class="stat-label">Cars Off Road</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card leaderboard">
+                    <h3>🏅 Top Eco Travelers</h3>
+                    <div class="leader-item">
+                        <span class="leader-rank">#1</span>
+                        <span>Akhil Singh</span>
+                        <span style="font-weight: 600; color: var(--primary);">2,450 pts</span>
+                    </div>
+                    <div class="leader-item">
+                        <span class="leader-rank">#2</span>
+                        <span>Akanksha Singh</span>
+                        <span style="font-weight: 600; color: var(--primary);">2,180 pts</span>
+                    </div>
+                    <div class="leader-item">
+                        <span class="leader-rank">#3</span>
+                        <span>Muskan Singh</span>
+                        <span style="font-weight: 600; color: var(--primary);">1,890 pts</span>
+                    </div>
+                    <div class="leader-item" style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin-top: 5px;">
+                        <span class="leader-rank">#4 YOU</span>
+                        <span style="flex: 1;">Your Rank</span>
+                        <span id="yourRank" style="font-weight: 600; color: var(--primary);">1,250 pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rewards Tab -->
+            <div class="tab-content" id="rewards">
+                <div class="card">
+                    <h3>🏆 Redeem Your Points</h3>
+                    <div class="rewards-grid">
+                        <div class="reward-item">
+                            <div>
+                                <div class="reward-name">🚌 Public Transport Pass</div>
+                                <small>30-day unlimited metro/bus</small>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="reward-pts">500 pts</span>
+                                <button class="redeem-btn" onclick="redeemReward(500, 'Public Transport Pass')">Redeem</button>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div>
+                                <div class="reward-name">🛍️ Partner Store Discount</div>
+                                <small>20% off sustainable brands</small>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="reward-pts">750 pts</span>
+                                <button class="redeem-btn" onclick="redeemReward(750, 'Partner Store Discount')">Redeem</button>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div>
+                                <div class="reward-name">🌱 Tree Planting Certificate</div>
+                                <small>Plant a tree in your name</small>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="reward-pts">1,000 pts</span>
+                                <button class="redeem-btn" onclick="redeemReward(1000, 'Tree Planting')">Redeem</button>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div>
+                                <div class="reward-name">📋 Tax Rebate Voucher</div>
+                                <small>Government sustainability incentive</small>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="reward-pts">1,500 pts</span>
+                                <button class="redeem-btn" onclick="redeemReward(1500, 'Tax Rebate')">Redeem</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div class="tab-content" id="stats">
+                <div class="card">
+                    <h3>📈 Your Weekly Stats</h3>
+                    <div class="stats-chart">
+                        <div class="chart-bar">
+                            <div class="chart-label">Monday</div>
+                            <div class="chart-fill" style="width: 60%;"></div>
+                            <div class="chart-value">2.1 kg</div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Tuesday</div>
+                            <div class="chart-fill" style="width: 75%;"></div>
+                            <div class="chart-value">2.8 kg</div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Wednesday</div>
+                            <div class="chart-fill" style="width: 45%;"></div>
+                            <div class="chart-value">1.6 kg</div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Thursday</div>
+                            <div class="chart-fill" style="width: 90%;"></div>
+                            <div class="chart-value">3.2 kg</div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Friday</div>
+                            <div class="chart-fill" style="width: 100%;"></div>
+                            <div class="chart-value">3.5 kg</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Monthly Summary</h3>
+                    <p style="margin-bottom: 10px; color: var(--text-light); font-size: 14px;">
+                        <strong>Total CO₂ Saved:</strong> 52 kg<br>
+                        <strong>Trips Completed:</strong> 24<br>
+                        <strong>Green Points Earned:</strong> 2,600<br>
+                        <strong>Trees Equivalent:</strong> 0.21 trees
+                    </p>
+                    <div class="export-section">
+                        <button class="export-btn" onclick="exportData('csv')">📥 Export as CSV</button>
+                        <button class="export-btn" onclick="exportData('pdf')">📄 Export as PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>✅ Great Choice!</h2>
+            <p id="modalText">You earned <strong id="modalPoints">0</strong> Green Points!</p>
+            <button class="close-modal" onclick="closeModal()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Emission factors (kg CO2 per passenger-km) [web:52][web:55]
+        const emissionFactors = {
+            car: 0.19,
+            bus: 0.09,
+            train: 0.04,
+            walk: 0.00,
+            cycle: 0.00,
+            carpool: 0.06
+        };
+        
+        const modeLabels = {
+            car: 'Solo Car',
+            bus: 'Bus',
+            train: 'Metro/Train',
+            walk: 'Walk',
+            cycle: 'Cycle',
+            carpool: 'Carpool'
+        };
+
+        const pointsPerKg = 50;
+        let userData = {
+            points: parseInt(localStorage.getItem('ecogoPoints')) || 1250,
+            trips: JSON.parse(localStorage.getItem('ecogoTrips')) || [],
+            totalCo2: parseFloat(localStorage.getItem('ecogoTotalCo2')) || 12847
+        };
+        
+        let currentRoute = {
+            start: '',
+            end: '',
+            distance: 0,
+            busOption: null,
+            carpoolOption: null
+        };
+        
+        let activeJourney = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            startModeDetection();
+        });
+
+        function updateUI() {
+            document.getElementById('greenPoints').textContent = userData.points.toLocaleString();
+            document.getElementById('yourRank').textContent = userData.points.toLocaleString() + ' pts';
+            document.getElementById('totalCo2').textContent = userData.totalCo2.toLocaleString();
+            saveTolocalStorage();
+        }
+
+        function calculateTrip() {
+            const start = document.getElementById('start').value || 'Home';
+            const end = document.getElementById('end').value || 'College';
+            const distance = 8 + Math.random() * 2;
+            
+            // Store current route info
+            currentRoute.start = start;
+            currentRoute.end = end;
+            currentRoute.distance = distance;
+            
+            const carEmissions = distance * emissionFactors.car;
+            const busOption = { mode: 'bus', emissions: distance * emissionFactors.bus, label: '🚌 Bus', time: '25 min', cost: '₹20' };
+            const carpoolOption = { mode: 'carpool', emissions: distance * emissionFactors.carpool, label: '🚗 Carpool', time: '18 min', cost: '₹10' };
+            
+            currentRoute.busOption = busOption;
+            currentRoute.carpoolOption = carpoolOption;
+            
+            const options = [
+                busOption,
+                { mode: 'train', emissions: distance * emissionFactors.train, label: '🚆 Metro', time: '20 min', cost: '₹15' },
+                carpoolOption,
+                { mode: 'cycle', emissions: 0, label: '🚲 Cycle', time: '35 min', cost: '₹0' }
+            ];
+
+            let html = '';
+            options.forEach((opt, idx) => {
+                const saved = Math.round((carEmissions - opt.emissions) * 100) / 100;
+                const points = Math.round(saved * pointsPerKg);
+                html += `
+                    <div class="mode-btn" onclick="selectMode('${opt.mode}', ${saved}, ${points}, '${opt.label}')">
+                        ${opt.label}<br>
+                        <small>${opt.time} | ${opt.cost} | <strong>+${points} pts</strong><br>
+                        ${saved.toFixed(2)} kg CO₂ saved</small>
+                    </div>
+                `;
+            });
+
+            document.getElementById('routeOptions').innerHTML = html;
+            document.getElementById('tripResults').style.display = 'block';
+            document.getElementById('co2Saved').textContent = `${carEmissions.toFixed(1)} kg CO₂ vs Solo Car`;
+            
+            // Show booking options
+            document.getElementById('bookingOptions').classList.add('active');
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('busDate').setAttribute('min', today);
+            document.getElementById('carpoolDate').setAttribute('min', today);
+        }
+
+        function startManualJourney() {
+            const distance = parseFloat(document.getElementById('manualDistance').value);
+            const mode = document.getElementById('manualMode').value;
+            
+            if (activeJourney) {
+                alert('Finish the current journey before starting a new one.');
+                return;
+            }
+            
+            if (!distance || distance <= 0) {
+                alert('Please enter a valid distance (km).');
+                return;
+            }
+            
+            activeJourney = {
+                distance,
+                mode,
+                startTime: new Date()
+            };
+            
+            document.getElementById('manualStatus').textContent = `Tracking ${distance.toFixed(2)} km via ${modeLabels[mode]}. Click Complete when your journey ends.`;
+            document.getElementById('startJourneyBtn').textContent = 'Tracking...';
+            document.getElementById('startJourneyBtn').disabled = true;
+            document.getElementById('completeJourneyBtn').disabled = false;
+            document.getElementById('manualResults').style.display = 'none';
+        }
+
+        function completeManualJourney() {
+            if (!activeJourney) {
+                alert('No journey in progress. Please start a journey first.');
+                return;
+            }
+            
+            const { distance, mode, startTime } = activeJourney;
+            const elapsedMin = Math.max(1, Math.round((Date.now() - startTime.getTime()) / 60000));
+            const modeEmission = distance * emissionFactors[mode];
+            const carEmission = distance * emissionFactors.car;
+            const saved = Math.max(0, carEmission - modeEmission);
+            const points = Math.round(saved * pointsPerKg);
+            
+            userData.points += points;
+            userData.totalCo2 += saved;
+            userData.trips.push({
+                date: new Date().toLocaleDateString(),
+                mode: mode,
+                co2: saved,
+                points: points,
+                distance: distance,
+                durationMin: elapsedMin
+            });
+            
+            updateUI();
+            showSuccessModal(points, saved);
+            
+            document.getElementById('manualCo2Summary').textContent = `${modeEmission.toFixed(2)} kg CO₂ emitted | ${saved.toFixed(2)} kg saved vs car`;
+            document.getElementById('manualSummary').innerHTML = `
+                <div class="booking-info-item">
+                    <span class="booking-info-label">Mode:</span>
+                    <span class="booking-info-value">${modeLabels[mode]}</span>
+                </div>
+                <div class="booking-info-item">
+                    <span class="booking-info-label">Distance:</span>
+                    <span class="booking-info-value">${distance.toFixed(2)} km</span>
+                </div>
+                <div class="booking-info-item">
+                    <span class="booking-info-label">Duration:</span>
+                    <span class="booking-info-value">${elapsedMin} min</span>
+                </div>
+                <div class="booking-info-item">
+                    <span class="booking-info-label">Points Earned:</span>
+                    <span class="booking-info-value" style="color: var(--primary);">+${points} pts</span>
+                </div>
+            `;
+            
+            document.getElementById('manualResults').style.display = 'block';
+            document.getElementById('manualStatus').textContent = 'Journey completed. Log another trip whenever you are ready.';
+            document.getElementById('startJourneyBtn').textContent = 'Start Journey';
+            document.getElementById('startJourneyBtn').disabled = false;
+            document.getElementById('completeJourneyBtn').disabled = true;
+            activeJourney = null;
+        }
+
+        function selectMode(mode, co2Saved, points, label) {
+            userData.points += points;
+            userData.totalCo2 += co2Saved;
+            userData.trips.push({
+                date: new Date().toLocaleDateString(),
+                mode: mode,
+                co2: co2Saved,
+                points: points
+            });
+
+            updateUI();
+            playConfetti();
+            showSuccessModal(points, co2Saved);
+        }
+
+        function redeemReward(cost, name) {
+            if (userData.points >= cost) {
+                userData.points -= cost;
+                updateUI();
+                alert(`🎉 Redeemed: ${name}\n✅ Points deducted: ${cost}\nRemaining: ${userData.points}`);
+            } else {
+                alert(`❌ Not enough points!\nYou need ${cost - userData.points} more points.`);
+            }
+        }
+
+        function showSuccessModal(points, co2) {
+            document.getElementById('modalPoints').textContent = points;
+            document.getElementById('modalText').innerHTML = `You earned <strong>${points}</strong> Green Points!<br><small>${co2.toFixed(2)} kg CO₂ saved 🌍</small>`;
+            document.getElementById('successModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        function playConfetti() {
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.background = ['#4CAF50', '#45a049', '#667eea', '#764ba2'][Math.floor(Math.random() * 4)];
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function startModeDetection() {
+            setInterval(() => {
+                const modes = [
+                    { name: 'Walking', icon: '🚶' },
+                    { name: 'Cycling', icon: '🚲' },
+                    { name: 'Bus', icon: '🚌' },
+                    { name: 'Carpool', icon: '🚗' },
+                    { name: 'Metro', icon: '🚆' }
+                ];
+                const randomMode = modes[Math.floor(Math.random() * modes.length)];
+                const confidence = (80 + Math.random() * 15).toFixed(0);
+                document.getElementById('detectedMode').textContent = `${randomMode.icon} ${randomMode.name} (${confidence}% confidence)`;
+            }, 5000);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function exportData(format) {
+            if (format === 'csv') {
+                let csv = 'Date,Mode,CO2 Saved,Points Earned\n';
+                userData.trips.forEach(trip => {
+                    csv += `${trip.date},${trip.mode},${trip.co2},${trip.points}\n`;
+                });
+                downloadFile(csv, 'ecogo-trips.csv', 'text/csv');
+            } else if (format === 'pdf') {
+                alert('📄 PDF export feature:\n- Total CO₂ Saved: ' + userData.totalCo2.toFixed(2) + ' kg\n- Green Points: ' + userData.points + '\n- Trips Completed: ' + userData.trips.length);
+            }
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type: type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+
+        function saveTolocalStorage() {
+            localStorage.setItem('ecogoPoints', userData.points);
+            localStorage.setItem('ecogoTrips', JSON.stringify(userData.trips));
+            localStorage.setItem('ecogoTotalCo2', userData.totalCo2);
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('successModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Booking Functions
+        function showBusBooking() {
+            closeAllBookings();
+            const busBooking = document.getElementById('busBooking');
+            busBooking.classList.add('active');
+            
+            // Update booking info
+            if (currentRoute.busOption) {
+                const saved = Math.round((currentRoute.distance * emissionFactors.car - currentRoute.busOption.emissions) * 100) / 100;
+                const points = Math.round(saved * pointsPerKg);
+                document.getElementById('busInfo').innerHTML = `
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Route:</span>
+                        <span class="booking-info-value">${currentRoute.start} → ${currentRoute.end}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Distance:</span>
+                        <span class="booking-info-value">${currentRoute.distance.toFixed(1)} km</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Estimated Time:</span>
+                        <span class="booking-info-value">${currentRoute.busOption.time}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Price:</span>
+                        <span class="booking-info-value">${currentRoute.busOption.cost}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">CO₂ Saved:</span>
+                        <span class="booking-info-value" style="color: var(--primary);">${saved.toFixed(2)} kg</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Points Earned:</span>
+                        <span class="booking-info-value" style="color: var(--primary);">+${points} pts</span>
+                    </div>
+                `;
+            }
+            
+            // Scroll to booking section
+            busBooking.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function showCarpoolBooking() {
+            closeAllBookings();
+            const carpoolBooking = document.getElementById('carpoolBooking');
+            carpoolBooking.classList.add('active');
+            
+            // Update booking info
+            if (currentRoute.carpoolOption) {
+                const saved = Math.round((currentRoute.distance * emissionFactors.car - currentRoute.carpoolOption.emissions) * 100) / 100;
+                const points = Math.round(saved * pointsPerKg);
+                document.getElementById('carpoolInfo').innerHTML = `
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Route:</span>
+                        <span class="booking-info-value">${currentRoute.start} → ${currentRoute.end}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Distance:</span>
+                        <span class="booking-info-value">${currentRoute.distance.toFixed(1)} km</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Estimated Time:</span>
+                        <span class="booking-info-value">${currentRoute.carpoolOption.time}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Price per Seat:</span>
+                        <span class="booking-info-value">${currentRoute.carpoolOption.cost}</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">CO₂ Saved:</span>
+                        <span class="booking-info-value" style="color: var(--primary);">${saved.toFixed(2)} kg</span>
+                    </div>
+                    <div class="booking-info-item">
+                        <span class="booking-info-label">Points Earned:</span>
+                        <span class="booking-info-value" style="color: var(--primary);">+${points} pts</span>
+                    </div>
+                `;
+            }
+            
+            // Scroll to booking section
+            carpoolBooking.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function confirmBusBooking() {
+            const date = document.getElementById('busDate').value;
+            const time = document.getElementById('busTime').value;
+            const passengers = document.getElementById('busPassengers').value;
+            
+            if (!date || !time || !passengers) {
+                alert('❌ Please fill in all required fields!');
+                return;
+            }
+            
+            const totalCost = parseInt(currentRoute.busOption.cost.replace('₹', '')) * parseInt(passengers);
+            const saved = Math.round((currentRoute.distance * emissionFactors.car - currentRoute.busOption.emissions) * 100) / 100;
+            const points = Math.round(saved * pointsPerKg);
+            
+            // Update user data
+            userData.points += points;
+            userData.totalCo2 += saved;
+            userData.trips.push({
+                date: new Date().toLocaleDateString(),
+                mode: 'bus',
+                co2: saved,
+                points: points,
+                booking: {
+                    date: date,
+                    time: time,
+                    passengers: passengers,
+                    cost: totalCost
+                }
+            });
+            
+            updateUI();
+            playConfetti();
+            
+            // Show success message
+            alert(`✅ Bus Booking Confirmed!\n\n📅 Date: ${new Date(date).toLocaleDateString()}\n⏰ Time: ${time}\n👥 Passengers: ${passengers}\n💰 Total Cost: ₹${totalCost}\n🌍 CO₂ Saved: ${saved.toFixed(2)} kg\n🎉 Points Earned: +${points} pts\n\nYour booking ID: BUS${Date.now().toString().slice(-6)}`);
+            
+            closeBooking('busBooking');
+        }
+        
+        function confirmCarpoolBooking() {
+            const date = document.getElementById('carpoolDate').value;
+            const time = document.getElementById('carpoolTime').value;
+            const seats = document.getElementById('carpoolSeats').value;
+            const vehicle = document.getElementById('carpoolVehicle').value;
+            
+            if (!date || !time || !seats) {
+                alert('❌ Please fill in all required fields!');
+                return;
+            }
+            
+            const costPerSeat = parseInt(currentRoute.carpoolOption.cost.replace('₹', ''));
+            const totalCost = costPerSeat * parseInt(seats);
+            const saved = Math.round((currentRoute.distance * emissionFactors.car - currentRoute.carpoolOption.emissions) * 100) / 100;
+            const points = Math.round(saved * pointsPerKg);
+            
+            // Simulate finding a match
+            const drivers = ['Raj Kumar', 'Priya Singh', 'Amit Patel', 'Sneha Reddy', 'Vikram Mehta'];
+            const matchedDriver = drivers[Math.floor(Math.random() * drivers.length)];
+            const vehicleTypes = { 'any': 'Sedan', 'sedan': 'Sedan', 'suv': 'SUV', 'hatchback': 'Hatchback' };
+            const matchedVehicle = vehicle === 'any' ? vehicleTypes[Object.keys(vehicleTypes)[Math.floor(Math.random() * 3) + 1]] : vehicleTypes[vehicle];
+            
+            // Update user data
+            userData.points += points;
+            userData.totalCo2 += saved;
+            userData.trips.push({
+                date: new Date().toLocaleDateString(),
+                mode: 'carpool',
+                co2: saved,
+                points: points,
+                booking: {
+                    date: date,
+                    time: time,
+                    seats: seats,
+                    cost: totalCost,
+                    driver: matchedDriver,
+                    vehicle: matchedVehicle
+                }
+            });
+            
+            updateUI();
+            playConfetti();
+            
+            // Show success message with match details
+            alert(`✅ Carpool Match Found!\n\n🚗 Driver: ${matchedDriver}\n🚙 Vehicle: ${matchedVehicle}\n📅 Date: ${new Date(date).toLocaleDateString()}\n⏰ Time: ${time}\n💺 Seats: ${seats}\n💰 Total Cost: ₹${totalCost}\n🌍 CO₂ Saved: ${saved.toFixed(2)} kg\n🎉 Points Earned: +${points} pts\n\nYour booking ID: CP${Date.now().toString().slice(-6)}\n\nContact details will be sent to your registered number.`);
+            
+            closeBooking('carpoolBooking');
+        }
+        
+        function closeBooking(bookingId) {
+            document.getElementById(bookingId).classList.remove('active');
+        }
+        
+        function closeAllBookings() {
+            document.getElementById('busBooking').classList.remove('active');
+            document.getElementById('carpoolBooking').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
